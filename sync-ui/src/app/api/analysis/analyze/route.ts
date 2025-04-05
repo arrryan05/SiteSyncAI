@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
+import { API_ROUTES } from '@/config';
 
-const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:8000'; 
 
 export async function POST(request: Request) {
   try {
@@ -14,12 +14,12 @@ export async function POST(request: Request) {
     }
 
     // Forward the request to backend
-    const response = await fetch(`${BACKEND_URL}/analyze`, {
+    const response = await fetch(API_ROUTES.ANALYZE, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ website }),
+      body: JSON.stringify({ url: website }),
     });
 
     const data = await response.json();

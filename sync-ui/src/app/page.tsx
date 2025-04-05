@@ -1,8 +1,8 @@
-'use client';
-import { useState } from 'react';
+"use client";
+import { useState } from "react";
 
 export default function Home() {
-  const [website, setWebsite] = useState('');
+  const [website, setWebsite] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
@@ -10,28 +10,28 @@ export default function Home() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!website.trim()) return;
-    console.log(website)
+    console.log(website);
 
     setIsLoading(true);
     setError(null);
 
     try {
-      const response = await fetch('/api/analyze', {
-        method: 'POST',
+      const response = await fetch("/api/analysis/analyze", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({ website }),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to analyze website');
+        throw new Error("Failed to analyze website");
       }
 
       const data = await response.json();
       setResponse(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -44,7 +44,6 @@ export default function Home() {
           SiteSync AI
         </h1>
 
-        {/* Input Form */}
         <form onSubmit={handleSubmit} className="mb-8">
           <div className="relative">
             <input
@@ -64,11 +63,25 @@ export default function Home() {
         </form>
 
         {/* Output Window */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg">
-          <h2 className="text-xl font-semibold mb-4 text-blue-400">Analysis Results</h2>
-          <div className="space-y-4">
-            {website}
-          </div>
+        {/* Output Window */}
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg min-h-[200px] flex flex-col gap-4">
+          <h2 className="text-xl font-semibold text-blue-400">
+            Analysis Results
+          </h2>
+
+          {isLoading ? (
+            <div className="flex items-center justify-center text-gray-400 animate-pulse">
+              Analyzing website...
+            </div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : response?.analysis ? (
+            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+              {response.analysis}
+            </div>
+          ) : (
+            <div className="text-gray-500">No analysis yet.</div>
+          )}
         </div>
       </div>
     </main>
