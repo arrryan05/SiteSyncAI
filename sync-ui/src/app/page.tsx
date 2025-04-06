@@ -1,19 +1,41 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export default function Home() {
   const [website, setWebsite] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
   const [response, setResponse] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const loadingMessages = [
+    "Analysing the website...",
+    "Processing the information...",
+    "Preparing insights...",
+  ];
+
+  useEffect(() => {
+    if (isLoading) {
+      const timeouts: NodeJS.Timeout[] = [];
+
+      for (let i = 1; i < loadingMessages.length; i++) {
+        const timeout = setTimeout(() => setLoadingStep(i), i * 2000);
+        timeouts.push(timeout);
+      }
+
+      return () => timeouts.forEach(clearTimeout);
+    } else {
+      setLoadingStep(0);
+    }
+  }, [isLoading]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!website.trim()) return;
-    console.log(website);
 
     setIsLoading(true);
     setError(null);
+    setResponse(null);
 
     try {
       const response = await fetch("/api/analysis/analyze", {
@@ -38,7 +60,7 @@ export default function Home() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-900 text-white p-8 flex items-center justify-center">
+    <main className="min-h-screen text-white p-8 flex items-center justify-center flex-col bg-[linear-gradient(to_right,#000000,#063372)]">
       <div className="max-w-4xl w-full">
         <h1 className="text-4xl font-bold text-center mb-8 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">
           SiteSync AI
@@ -51,7 +73,7 @@ export default function Home() {
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
               placeholder="Enter website URL..."
-              className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-gray-400"
+              className="w-full px-4 py-3 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent text-white placeholder-black-400"
             />
             <button
               type="submit"
@@ -62,26 +84,22 @@ export default function Home() {
           </div>
         </form>
 
-        {/* Output Window */}
-        {/* Output Window */}
-        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg min-h-[200px] flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-blue-400">
+        <div className="bg-gray-800 rounded-lg p-6 border border-gray-700 shadow-lg min-h-[200px]">
+          <h2 className="text-xl font-semibold mb-4 text-blue-400">
             Analysis Results
           </h2>
 
           {isLoading ? (
-            <div className="flex items-center justify-center text-gray-400 animate-pulse">
-              Analyzing website...
+            <div className="text-center animate-pulse text-white font-medium text-lg">
+              {loadingMessages[loadingStep]}
             </div>
-          ) : error ? (
-            <div className="text-red-500">{error}</div>
           ) : response?.analysis ? (
-            <div className="whitespace-pre-wrap text-sm leading-relaxed">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed space-y-4">
               {response.analysis}
             </div>
-          ) : (
-            <div className="text-gray-500">No analysis yet.</div>
-          )}
+          ) : error ? (
+            <p className="text-red-500">{error}</p>
+          ) : null}
         </div>
       </div>
     </main>
