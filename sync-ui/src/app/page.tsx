@@ -52,7 +52,8 @@ export default function HomePage() {
 
       <button
         className="mt-5 px-10 py-2 flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white rounded-xl text-lg hover:scale-110 transition-transform shadow-md"
-        onClick={() => router.push("/analyzer")}
+        // onClick={() => router.push("/analyzer")}
+        onClick={() => router.push("/signin")}
       >
         Get Started
         <ArrowRightAltOutlinedIcon className="text-white" />
