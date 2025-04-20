@@ -10,6 +10,7 @@ export const API_ROUTES = {
   // Auth
   SIGNUP: `${BASE}/api/auth/signup`,
   LOGIN: `${BASE}/api/auth/login`,
+  GOOGLE_AUTH:`${BASE}/api/auth/google`,
 
   // Projects
   PROJECT_CREATE: `${BASE}/api/project/create`,
@@ -21,6 +22,7 @@ export const API_ROUTES = {
   // Analysis
   ANALYZE: `${BASE}/api/analysis/analyze`,
   RERUN: (projectId: string) => `${BASE}/api/analysis/rerun?projectId=${projectId}`,
+
 
 
 };

@@ -1,16 +1,50 @@
+// import "./globals.css";
+// import { AuthProvider } from "../hooks/usAuth";
+// import Navbar from "../components/NavBar";
+
+// export const metadata = {
+//   title: "SiteSync AI",
+//   description: "AI‑powered SEO & performance audits",
+// };
+
+// export default function RootLayout({ children }: { children: React.ReactNode }) {
+//   return (
+//     <html lang="en">
+      
+//       <body className="bg-[#0f0f2e] text-white">
+//         <AuthProvider>
+//           <Navbar />
+//           {children}
+//         </AuthProvider>
+//       </body>
+//     </html>
+//   );
+// }
+
+// app/layout.tsx
+"use client";
 import "./globals.css";
+import Head from "next/head";
+import Script from "next/script";
 import { AuthProvider } from "../hooks/usAuth";
 import Navbar from "../components/NavBar";
-
-export const metadata = {
-  title: "SiteSync AI",
-  description: "AI‑powered SEO & performance audits",
-};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
+      <Head>
+        <meta
+          name="google-signin-client_id"
+          content={process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID}
+        />
+      </Head>
       <body className="bg-[#0f0f2e] text-white">
+        {/* Loads `window.google` after hydration */}
+        <Script
+          src="https://accounts.google.com/gsi/client"
+          strategy="afterInteractive"
+        />
+
         <AuthProvider>
           <Navbar />
           {children}
@@ -19,3 +53,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/usAuth";
 import { ProjectResponse } from "../../types/project.type";
@@ -18,6 +18,9 @@ export default function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [website, setWebsite] = useState("");
+
+  // Toast state
+  const [toast, setToast] = useState<string>("");
 
   useEffect(() => {
     if (!token) return router.push("/auth/login");
@@ -46,10 +49,15 @@ export default function DashboardPage() {
       body: JSON.stringify({ name: projectName, website }),
     });
     if (res.ok) {
+      // Clear form + close modal
       setProjectName("");
       setWebsite("");
       setOpen(false);
-      fetchProjects();
+      await fetchProjects();
+
+      // Show toast
+      setToast("Project created successfully!");
+      setTimeout(() => setToast(""), 3000);
     }
     setLoading(false);
   };
@@ -62,6 +70,8 @@ export default function DashboardPage() {
     });
     if (res.ok) {
       fetchProjects(); // Refresh project list
+      setToast("Project deleted.");
+      setTimeout(() => setToast(""), 3000);
     } else {
       alert("Failed to delete");
     }
@@ -72,7 +82,7 @@ export default function DashboardPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold text-white">Your Projects</h1>
         <button
-          className="px-4 py-2 border border-blue-400 text-whit e-400 rounded-full hover:bg-gray-800 transition"
+          className="px-4 py-2 border border-blue-400 text-white rounded-full hover:bg-gray-800 transition"
           onClick={() => setOpen(true)}
         >
           New Project
@@ -82,7 +92,7 @@ export default function DashboardPage() {
       {projects.length === 0 ? (
         <p className="text-gray-400">No projects yet.</p>
       ) : (
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4">
           {projects.map((p) => (
             <ProjectCard
               key={p.id}
@@ -96,8 +106,14 @@ export default function DashboardPage() {
 
       {/* Modal */}
       {open && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-          <div className="bg-white dark:bg-gray-900 p-6 rounded-lg shadow-xl w-[90%] max-w-md">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md"
+          onClick={() => setOpen(false)}
+        >
+          <div
+            className="bg-white dark:bg-gray-900 p-6 rounded-xl shadow-xl w-[90%] max-w-md"
+            onClick={(e) => e.stopPropagation()}
+          >
             <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-white">
               Create New Project
             </h2>
@@ -122,6 +138,14 @@ export default function DashboardPage() {
           </div>
         </div>
       )}
+
+      {/* Toast */}
+      {toast && (
+        <div className="fixed bottom-4 right-4 bg-green-800 text-black px-4 py-2 rounded shadow-lg animate-fade-in">
+          {toast}
+        </div>
+      )}
     </div>
   );
 }
+

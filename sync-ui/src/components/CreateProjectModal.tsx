@@ -2,7 +2,11 @@
 import { useState } from "react";
 import { API_ROUTES } from "@/config";
 
-export default function CreateProjectModal({ open, onClose, onProjectCreated }: any) {
+export default function CreateProjectModal({
+  open,
+  onClose,
+  onProjectCreated,
+}: any) {
   const [form, setForm] = useState({ name: "", website: "" });
   const [loading, setLoading] = useState(false);
 
@@ -31,7 +35,7 @@ export default function CreateProjectModal({ open, onClose, onProjectCreated }: 
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black bg-opacity-60 flex items-center justify-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-md">
       <div className="bg-[#1a1a2e] p-6 rounded-xl w-[90%] max-w-md">
         <h2 className="text-xl font-bold mb-4">Create New Project</h2>
         <input

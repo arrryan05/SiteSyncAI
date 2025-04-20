@@ -1,9 +1,10 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button";
 import { useAuth } from "../../../hooks/usAuth";
+import { API_ROUTES } from "@/config";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -20,6 +21,41 @@ export default function LoginPage() {
     if (ok) return router.push("/dashboard");
     setError("Invalid credentials");
   };
+
+  // ─── Google Sign‑In Integration ────────────────────────────────────
+  useEffect(() => {
+    // only run on client, and only if google SDK is loaded
+    if (typeof window === "undefined" || !window.google) return;
+
+    window.google.accounts.id.initialize({
+      client_id: process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID!,
+      callback: handleGoogleResponse,
+    });
+    window.google.accounts.id.renderButton(
+      document.getElementById("google-signin")!,
+      { theme: "outline", size: "large" }
+    );
+    // optionally show the One‑Tap prompt:
+    // window.google.accounts.id.prompt();
+  }, []);
+
+  async function handleGoogleResponse(response: any) {
+    try {
+      const res = await fetch(API_ROUTES.GOOGLE_AUTH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      if (!res.ok) throw new Error("Google login failed");
+      const { token } = await res.json();
+      localStorage.setItem("token", token);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Google sign‑in failed");
+    }
+  }
+  // ─────────────────────────────────────────────────────────────────────
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
@@ -48,6 +84,16 @@ export default function LoginPage() {
         <Button type="submit" fullWidth>
           Log In
         </Button>
+
+        {/* Divider */}
+        <div className="flex items-center gap-2">
+          <hr className="flex-1 border-gray-600" />
+          <span className="text-gray-400">OR</span>
+          <hr className="flex-1 border-gray-600" />
+        </div>
+
+        {/* Google Sign‑In button container */}
+        <div id="google-signin" className="flex justify-center" />
 
         <p className="text-sm text-center text-gray-400">
           Don’t have an account?{" "}

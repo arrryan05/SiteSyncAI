@@ -1,11 +1,11 @@
 import React from "react";
 import { ProjectResponse } from "../types/project.type";
-import { FiCode, FiTrash2 } from "react-icons/fi";
+import { FiTrash2, FiCheck, FiClock } from "react-icons/fi";
 
 interface ProjectCardProps {
   project: ProjectResponse;
   onClick?: () => void;
-  onDelete?: () => void;      
+  onDelete?: () => void;
 }
 
 export default function ProjectCard({
@@ -16,25 +16,42 @@ export default function ProjectCard({
   return (
     <div
       onClick={onClick}
-      className="group relative cursor-pointer rounded-xl bg-[#1e1e1e] hover:bg-[#2a2a2a] transition p-4 shadow-md border border-gray-700 w-full max-w-sm"
+      className="group relative cursor-pointer rounded-xl bg-white/5 hover:bg-white/10 transition-all p-4 shadow-md border border-white/10 w-full max-w-xs h-36 flex flex-col justify-between"
     >
-      <h3 className="text-white text-lg font-semibold mb-1">
-        {project.name}
-      </h3>
-      <p className="text-gray-400 text-sm truncate">{project.website}</p>
+      <div className="flex flex-col gap-0.5">
+        <h3 className="text-white text-base font-medium">{project.name}</h3>
+        <p className="text-l text-white-400 truncate">{project.website}</p>
+      </div>
 
-      {/* Code icon */}
-      {/* <FiCode className="absolute bottom-3 left-4 text-gray-500" size={18} /> */}
+      {/* Analysis complete badge */}
+      {project.status === "complete" ? (
+        <div className="absolute bottom-3 left-3 flex items-center gap-1">
+          <div className="w-6 h-6 border-2 border-green-500 rounded-full flex items-center justify-center">
+            <FiCheck
+              size={14}
+              className="text-green-500"
+              title="Analysis complete"
+            />
+          </div>
+        </div>
+      ) : (
+        <div className="absolute bottom-3 left-3 flex items-center gap-1">
+        <div
+          title="Analysis pending"
+        >
+          <FiClock size={16} className="text-yellow-500" />
+        </div>
+        </div>
+      )}
 
-      {/* Delete icon, shows on hover */}
       {onDelete && (
         <FiTrash2
-          size={18}
+          size={16}
           onClick={(e) => {
             e.stopPropagation();
             onDelete();
           }}
-          className="absolute bottom-3 right-4 text-gray-500 opacity-0 group-hover:opacity-100 hover:text-red-400 transition"
+          className="absolute bottom-3 right-3 text-gray-400  hover:text-red-400 transition"
           title="Delete project"
         />
       )}
