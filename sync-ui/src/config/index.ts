@@ -17,6 +17,8 @@ export const API_ROUTES = {
   PROJECT_LIST: `${BASE}/api/project/list`,
   PROJECT_DETAILS: (projectId: string) => `${BASE}/api/project/${projectId}`,
   PROJECT_DELETE: (id: string) => `${getBaseUrl()}/api/project/${id}`,
+  PROJECT_STREAM:   (id: string) => `${getBaseUrl()}/api/projects/${id}/stream`,
+
 
 
   // Analysis
