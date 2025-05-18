@@ -1,73 +1,67 @@
 // "use client";
+
 // import { useEffect, useState, useRef } from "react";
 // import { useRouter, useParams } from "next/navigation";
-// import { useAuth } from "../../../hooks/usAuth";
+// import { DiffView, DiffModeEnum } from "@git-diff-view/react";
+// // import "@git-diff-view/react/styles/diff-view.css";
+
+// import { Diff, Hunk } from "react-diff-view";
+// import "react-diff-view/style/index.css";
+// import { makeParsedDiff } from "@/utils/diff";
+
+// import { makeDiffFile } from "../../../utils/diff";
+// import { useAuth } from "@/hooks/usAuth";
 // import { API_ROUTES } from "@/config";
 // import { AnalysisInsight } from "@/types/project.type";
+// import { MetricInfo } from "@/components/MetricInfo";
 
 // export default function ProjectAnalysisPage() {
 //   const router = useRouter();
 //   const { projectId } = useParams<{ projectId: string }>();
 //   const { token } = useAuth();
 
-//   const [analysis, setAnalysis] = useState<AnalysisInsight[] | null>(null);
-//   const [status, setStatus] = useState<"pending" | "complete" | string>("");
+//   const [analysis, setAnalysis] = useState<AnalysisInsight[]>([]);
+//   const [status, setStatus] = useState<"pending"|"complete"|string>("");
 //   const [rerunning, setRerunning] = useState(false);
 //   const [rerunStatus, setRerunStatus] = useState("");
-//   const pollingRef = useRef<NodeJS.Timeout | null>(null);  
+//   const pollingRef = useRef<NodeJS.Timeout | null>(null);
 
-//   // Fetch project details (includes status + analysisSummary)
 //   const fetchAnalysis = async () => {
 //     if (!token) return;
-//     try {
-//       const res = await fetch(API_ROUTES.PROJECT_DETAILS(projectId), {
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       if (!res.ok) throw new Error("Failed to fetch project");
-//       const json = await res.json();
-//       setAnalysis(json.project.analysisSummary);
-//       setStatus(json.project.status);
-//     } catch (err) {
-//       console.error("Fetch analysis error:", err);
-//     }
+//     const res = await fetch(API_ROUTES.PROJECT_DETAILS(projectId), {
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//     const data = await res.json();
+//     if (!res.ok) return console.error(data);
+//     setAnalysis(Array.isArray(data.analysisSummary) ? data.analysisSummary : []);
+//     setStatus(typeof data.status === "string" ? data.status : "");
 //   };
 
-//   // Handle Rerun button
 //   const handleRerun = async () => {
 //     if (!token) return;
 //     setRerunning(true);
 //     setRerunStatus("Re-running analysis...");
-//     try {
-//       const res = await fetch(API_ROUTES.RERUN(projectId), {
-//         method: "POST",
-//         headers: { Authorization: `Bearer ${token}` },
-//       });
-//       setRerunStatus(res.ok ? "Analysis started!" : "Failed to start.");
-//       if (res.ok) {
-//         // reset status to pending and clear previous results
-//         setStatus("pending");
-//         setAnalysis(null);
-//       }
-//     } catch {
-//       setRerunStatus("Something went wrong.");
-//     } finally {
-//       setRerunning(false);
+//     const res = await fetch(API_ROUTES.RERUN(projectId), {
+//       method: "POST",
+//       headers: { Authorization: `Bearer ${token}` },
+//     });
+//     setRerunStatus(res.ok ? "Analysis started!" : "Failed to start.");
+//     if (res.ok) {
+//       setStatus("pending");
+//       setAnalysis([]);
 //     }
+//     setRerunning(false);
 //   };
 
-//   // 1️⃣ Initial load
-//   useEffect(() => {
-//     fetchAnalysis();
-//   }, [projectId, token]);
+//   useEffect(() => { fetchAnalysis(); }, [projectId, token]);
 
-//   // 2️⃣ Poll every 5s while status is pending
 //   useEffect(() => {
 //     if (status === "pending") {
 //       pollingRef.current = setInterval(fetchAnalysis, 5000);
 //     } else {
-//       clearInterval(pollingRef.current as NodeJS.Timeout);
+//       clearInterval(pollingRef.current!);
 //     }
-//     return () => clearInterval(pollingRef.current as NodeJS.Timeout);
+//     return () => clearInterval(pollingRef.current!);
 //   }, [status]);
 
 //   return (
@@ -79,274 +73,252 @@
 //         ← Back
 //       </button>
 
-//       <div className="flex items-center justify-between">
+//       <div className="flex justify-between items-center">
 //         <h1 className="text-2xl font-bold">Project Analysis</h1>
-//         <button
-//           onClick={handleRerun}
-//           disabled={rerunning}
-//           className="px-4 py-2 border border-blue-400 text-white rounded-full hover:bg-gray-800 transition disabled:opacity-50"
-//         >
+//         <button onClick={handleRerun} disabled={rerunning}
+//           className="px-4 py-2 border border-blue-400 text-white rounded-full hover:bg-gray-800 disabled:opacity-50">
 //           🔄 Rerun
 //         </button>
 //       </div>
 
-//       {rerunStatus && (
-//         <p className="text-sm text-gray-400">{rerunStatus}</p>
-//       )}
+//       {rerunStatus && <p className="text-sm text-gray-400">{rerunStatus}</p>}
 
-//       {/* Loader until first insight arrives */}
-//       {!analysis && status === "pending" && (
-//         <div className="flex flex-col items-center py-12">
-//           <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-//           <p className="mt-4 text-gray-400">Preparing analysis…</p>
-//         </div>
-//       )}
+//       {analysis.map((insight, idx) => (
+//         <div key={idx} className="mb-8 bg-[#1a1a2e]/70 p-6 rounded-xl shadow-lg">
+//           <h2 className="text-xl font-semibold text-blue-400 mb-4">
+//             Route: {insight.route}
+//           </h2>
 
-//       {/* Display insights as soon as they’re present */}
-//       {analysis && (
-//         <>
-//           {analysis.map((insight, idx) => (
-//             <div
-//               key={idx}
-//               className="mb-8 bg-[#1a1a2e]/70 backdrop-blur-md p-6 rounded-xl shadow-lg"
-//             >
-//               <h2 className="text-xl font-semibold text-blue-400 mb-4">
-//                 Route: {insight.route}
-//               </h2>
-//               {insight.performanceData.map((metrics, i) => (
-//                 <div
-//                   key={i}
-//                   className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
-//                 >
-//                   {Object.entries(metrics).map(([key, detail]) => (
-//                     <div
-//                       key={key}
-//                       className="bg-[#111827] p-4 rounded-lg border border-gray-700"
-//                     >
-//                       <h3 className="text-lg font-medium text-purple-300">
-//                         {key}
-//                       </h3>
-//                       <p className="text-sm text-gray-300">
-//                         Value:{" "}
-//                         <span className="font-semibold text-white">
-//                           {detail.value}
-//                         </span>
-//                       </p>
-//                       <p className="mt-2 text-sm text-gray-400">
-//                         Recommended Steps:
-//                       </p>
-//                       <ul className="list-disc list-inside text-sm text-gray-500">
-//                         {detail.recommendedSteps.map(
-//                           (step: string, j: number) => (
-//                             <li key={j}>{step}</li>
-//                           )
-//                         )}
-//                       </ul>
-//                     </div>
-//                   ))}
+//           {/* Metrics Grid */}
+//           {insight.performanceData.map((metrics, i) => (
+//             <div key={i} className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+//               {Object.entries(metrics).map(([name, detail]) => (
+//                 <div key={name}
+//                   className="bg-[#111827] p-4 rounded-lg border border-gray-700">
+//                   <h3 className="text-lg font-medium text-purple-300">
+//                     {name}<MetricInfo metric={name}/>
+//                   </h3>
+//                   <p className="text-sm text-gray-300">
+//                     Value: <span className="font-semibold text-white">{detail.value}</span>
+//                   </p>
+//                   <p className="mt-2 text-sm text-gray-400">Recommended Steps:</p>
+//                   <ul className="list-disc list-inside text-sm text-gray-500">
+//                     {detail.recommendedSteps.map((step:string, j:number) => <li key={j}>{step}</li>)}
+//                   </ul>
 //                 </div>
 //               ))}
 //             </div>
 //           ))}
 
-//           {/* Show a small spinner if still pending after some insights */}
-//           {status === "pending" && (
-//             <div className="flex justify-center py-4">
-//               <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-//             </div>
-//           )}
-//         </>
-//       )}
+//           {/* Code changes */}
+//           {insight.codeChanges &&
+//             Object.values(insight.codeChanges).flat().map((chg:any,j:number)=>{
+//               const file = makeParsedDiff(chg.file, chg.oldCode, chg.newCode);
+//               return (
+//                 <div key={j} className="mb-6">
+//                   <div className="flex justify-between text-xs text-gray-400 mb-1">
+//                     <span>{chg.file} (lines {chg.startLine}–{chg.endLine})</span>
+//                     <button
+//                       className="text-blue-400 hover:underline"
+//                       onClick={()=>navigator.clipboard.writeText(chg.newCode)}
+//                     >Copy New</button>
+//                   </div>
+//                   <div className="rounded-lg overflow-hidden">
+//                     <Diff viewType="split" diffType={file.type} hunks={file.hunks}>
+//                       {hunks => hunks.map(h=><Hunk key={h.content} hunk={h}/>)}
+//                     </Diff>
+//                   </div>
+//                   {chg.explanation && <p className="italic text-gray-400 mt-2">{chg.explanation}</p>}
+//                 </div>
+//               );
+//             })}
+//         </div>
+//       ))}
 
-//       {/* If analysis exists but status is complete and empty */}
-//       {analysis && analysis.length === 0 && status === "complete" && (
+//       {(status === "pending" && analysis.length > 0) && (
+//         <div className="flex justify-center py-4">
+//           <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+//         </div>
+//       )}
+//       {(analysis.length === 0 && status === "complete") && (
 //         <p className="text-gray-400">No routes found for analysis.</p>
 //       )}
 //     </div>
 //   );
 // }
+
+// app/(your-route)/project/[projectId]/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
-import { useAuth } from "../../../hooks/usAuth";
+
+import { useAuth } from "@/hooks/usAuth";
 import { API_ROUTES } from "@/config";
 import { AnalysisInsight } from "@/types/project.type";
+import { MetricInfo } from "@/components/MetricInfo";
+import { CodeChangesPanel, Change } from "@/components/CodeChangesPanel";
 
 export default function ProjectAnalysisPage() {
   const router = useRouter();
   const { projectId } = useParams<{ projectId: string }>();
   const { token } = useAuth();
 
-  const [analysis, setAnalysis] = useState<AnalysisInsight[] | null>(null);
+  const [analysis, setAnalysis] = useState<AnalysisInsight[]>([]);
   const [status, setStatus] = useState<"pending" | "complete" | string>("");
   const [rerunning, setRerunning] = useState(false);
   const [rerunStatus, setRerunStatus] = useState("");
-
-  // 1️⃣ Initial load of existing data
-  useEffect(() => {
+  const pollingRef = useRef<NodeJS.Timeout | null>(null);
+  async function fetchAnalysis() {
     if (!token) return;
-    fetch(API_ROUTES.PROJECT_DETAILS(projectId), {
+    const res = await fetch(API_ROUTES.PROJECT_DETAILS(projectId), {
       headers: { Authorization: `Bearer ${token}` },
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Failed to fetch project");
-        return res.json();
-      })
-      .then(({ project }) => {
-        setAnalysis(project.analysisSummary);
-        setStatus(project.status);
-      })
-      .catch(console.error);
-  }, [projectId, token]);
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      console.error(data);
+      return;
+    }
+    setAnalysis(
+      Array.isArray(data.analysisSummary) ? data.analysisSummary : []
+    );
+    setStatus(typeof data.status === "string" ? data.status : "");
+  }
 
-  // 2️⃣ Handle Rerun click
-  const handleRerun = async () => {
+  async function handleRerun() {
     if (!token) return;
     setRerunning(true);
     setRerunStatus("Re-running analysis...");
-    try {
-      const res = await fetch(API_ROUTES.RERUN(projectId), {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      if (!res.ok) throw new Error("Failed to start");
-      setRerunStatus("Analysis started!");
+    const res = await fetch(API_ROUTES.RERUN(projectId), {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    setRerunStatus(res.ok ? "Analysis started!" : "Failed to start.");
+    if (res.ok) {
       setStatus("pending");
-      setAnalysis(null);
-    } catch {
-      setRerunStatus("Something went wrong.");
-    } finally {
-      setRerunning(false);
+      setAnalysis([]);
     }
-  };
+    setRerunning(false);
+  }
 
   useEffect(() => {
-    if (!token) return;
-    const streamUrl = `${API_ROUTES.PROJECT_STREAM(projectId)}?token=${encodeURIComponent(
-      token
-    )}`;
-    const es = new EventSource(streamUrl);
-
-    es.addEventListener("analysisUpdate", (e) => {
-      try {
-        const payload = JSON.parse((e as MessageEvent).data) as AnalysisInsight & {
-          route: string;
-          performanceData: any;
-        };
-        setAnalysis((prev) => (prev ? [...prev, payload] : [payload]));
-        // We still mark as pending until worker sets status to complete
-      } catch (err) {
-        console.error("Failed to parse SSE data", err);
-      }
-    });
-
-    es.addEventListener("complete", () => {
-      setStatus("complete");
-      es.close();
-    });
-
-    es.onerror = (err) => {
-      console.error("SSE error:", err);
-      es.close();
-    };
-
-    return () => {
-      es.close();
-    };
+    fetchAnalysis();
   }, [projectId, token]);
+
+  useEffect(() => {
+    if (status === "pending") {
+      pollingRef.current = setInterval(fetchAnalysis, 5000);
+    } else {
+      clearInterval(pollingRef.current!);
+    }
+    return () => clearInterval(pollingRef.current!);
+  }, [status]);
 
   return (
     <div className="p-6 mt-10 space-y-6">
-      <button
-        className="px-4 py-2 border border-blue-400 text-white rounded-full hover:bg-gray-800 transition"
-        onClick={() => router.back()}
-      >
-        ← Back
-      </button>
-
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Project Analysis</h1>
+      {/* Header Buttons */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => router.back()}
+          className="px-4 py-2 border-2 border-blue-400 text-blue-400 rounded-full hover:bg-blue-400 hover:text-white transition"
+        >
+          ← Back
+        </button>
         <button
           onClick={handleRerun}
           disabled={rerunning}
-          className="px-4 py-2 border border-blue-400 text-white rounded-full hover:bg-gray-800 transition disabled:opacity-50"
+          className="px-4 py-2 border-2 border-blue-400 text-blue-400 rounded-full hover:bg-blue-400 hover:text-white disabled:opacity-50 transition"
         >
           🔄 Rerun
         </button>
       </div>
-
       {rerunStatus && <p className="text-sm text-gray-400">{rerunStatus}</p>}
 
-      {/* Loader until first insight arrives */}
-      {!analysis && status === "pending" && (
+      {/* Loading State */}
+      {analysis.length === 0 && status === "pending" && (
         <div className="flex flex-col items-center py-12">
-          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
           <p className="mt-4 text-gray-400">Preparing analysis…</p>
         </div>
       )}
 
-      {/* Display insights as soon as they arrive */}
-      {analysis && analysis.length > 0 && (
-        <>
-          {analysis.map((insight, idx) => (
+      {/* Analysis Cards */}
+      {analysis.map((insight, idx) => (
+        <div
+          key={idx}
+          className="bg-[#1a1a2e]/70 backdrop-blur-md p-6 rounded-xl shadow-lg space-y-6"
+        >
+          {/* Route */}
+          <h2 className="text-xl font-semibold text-blue-400">
+            Route: {insight.route}
+          </h2>
+
+          {/* Metrics Grid */}
+          {insight.performanceData.map((metrics, mi) => (
             <div
-              key={`${insight.route}-${idx}`}
-              className="mb-8 bg-[#1a1a2e]/70 backdrop-blur-md p-6 rounded-xl shadow-lg"
+              key={mi}
+              className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
             >
-              <h2 className="text-xl font-semibold text-blue-400 mb-4">
-                Route: {insight.route}
-              </h2>
-              {insight.performanceData.map((metrics, i) => (
+              {Object.entries(metrics).map(([name, detail]) => (
                 <div
-                  key={i}
-                  className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4"
+                  key={name}
+                  className="bg-[#111827] p-4 rounded-lg border border-gray-700"
                 >
-                  {Object.entries(metrics).map(([key, detail]) => (
-                    <div
-                      key={key}
-                      className="bg-[#111827] p-4 rounded-lg border border-gray-700"
-                    >
-                      <h3 className="text-lg font-medium text-purple-300">
-                        {key}
-                      </h3>
-                      <p className="text-sm text-gray-300">
-                        Value:{" "}
-                        <span className="font-semibold text-white">
-                          {(detail as any).value}
-                        </span>
-                      </p>
-                      <p className="mt-2 text-sm text-gray-400">
-                        Recommended Steps:
-                      </p>
-                      <ul className="list-disc list-inside text-sm text-gray-500">
-                        {(detail as any).recommendedSteps.map(
-                          (step: string, j: number) => (
-                            <li key={j}>{step}</li>
-                          )
-                        )}
-                      </ul>
-                    </div>
-                  ))}
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-medium text-purple-300">
+                      {name}
+                      <MetricInfo metric={name} />
+                    </h3>
+                  </div>
+                  <p className="text-sm text-gray-300">
+                    Value:{" "}
+                    <span className="font-semibold text-white">
+                      {detail.value}
+                    </span>
+                  </p>
+                  <p className="mt-2 text-sm text-gray-400">
+                    Recommended Steps:
+                  </p>
+                  <ul className="list-disc list-inside text-sm text-gray-500">
+                    {detail.recommendedSteps.map((step: string, si: number) => (
+                      <li key={si}>{step}</li>
+                    ))}
+                  </ul>
                 </div>
               ))}
             </div>
           ))}
 
-          {/* Spinner if still pending after some insights */}
-          {status === "pending" && (
-            <div className="flex justify-center py-4">
-              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-            </div>
+          {insight.codeChanges && (
+            <CodeChangesPanel
+              changes={Object.entries(insight.codeChanges).flatMap(
+                ([metric, arr]: [string, any[]]) =>
+                  arr.map((c) => ({
+                    file: c.file,
+                    startLine: c.startLine,
+                    endLine: c.endLine,
+                    oldCode: c.oldCode,
+                    newCode: c.newCode,
+                    explanation: c.explanation,
+                    metric: metric,
+                  }))
+              )}
+            />
           )}
-        </>
+        </div>
+      ))}
+
+      {/* Polling Spinner */}
+      {status === "pending" && analysis.length > 0 && (
+        <div className="flex justify-center py-4">
+          <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+        </div>
       )}
 
-      {/* No routes case */}
-      {analysis && analysis.length === 0 && status === "complete" && (
+      {/* No Results */}
+      {analysis.length === 0 && status === "complete" && (
         <p className="text-gray-400">No routes found for analysis.</p>
       )}
     </div>
   );
 }
-

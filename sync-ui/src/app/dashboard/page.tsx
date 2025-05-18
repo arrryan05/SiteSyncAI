@@ -18,6 +18,7 @@ export default function DashboardPage() {
   const [open, setOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [website, setWebsite] = useState("");
+  const [gitUrl, setGitUrl] = useState("");             // ← new state for gitUrl
 
   // Toast state
   const [toast, setToast] = useState<string>("");
@@ -28,30 +29,63 @@ export default function DashboardPage() {
   }, [token]);
 
   const fetchProjects = async () => {
-    const res = await fetch(API_ROUTES.PROJECT_LIST, {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    if (res.ok) {
-      const { projects } = await res.json();
-      setProjects(projects);
+    try {
+      const res = await fetch(API_ROUTES.PROJECT_LIST, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+  
+      // parse the body exactly once
+      const data = await res.json();
+      console.log("🏓 GET /projects response:", res.status, data);
+  
+      if (!res.ok) {
+        console.error("Failed to fetch projects:", res.status, data);
+        setProjects([]);  // clear stale
+        return;
+      }
+  
+      // pull out the array safely
+      const projectsArray: ProjectResponse[] = Array.isArray(data.projects)
+        ? data.projects
+        : Array.isArray(data)
+        ? data
+        : [];
+  
+      setProjects(projectsArray);
+    } catch (err) {
+      console.error("Error in fetchProjects:", err);
+      setProjects([]);    // clear stale
     }
   };
+  
 
   const createProject = async () => {
     if (!projectName.trim() || !website.trim()) return;
     setLoading(true);
+
+    // build payload, only include gitUrl if non-empty
+    const payload: Record<string, any> = {
+      name: projectName.trim(),
+      website: website.trim(),
+    };
+    if (gitUrl.trim()) {
+      payload.gitUrl = gitUrl.trim();
+    }
+
     const res = await fetch(API_ROUTES.PROJECT_CREATE, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify({ name: projectName, website }),
+      body: JSON.stringify(payload),
     });
+
     if (res.ok) {
       // Clear form + close modal
       setProjectName("");
       setWebsite("");
+      setGitUrl("");                      // ← reset gitUrl
       setOpen(false);
       await fetchProjects();
 
@@ -124,11 +158,19 @@ export default function DashboardPage() {
               onChange={(e) => setProjectName(e.target.value)}
             />
             <Input
-              className="mb-4"
+              className="mb-3"
               placeholder="Website URL"
               value={website}
               onChange={(e) => setWebsite(e.target.value)}
             />
+            {/* ← new optional field for GitRepo */}
+            <Input
+              className="mb-4"
+              placeholder="Git Repo URL (optional)"
+              value={gitUrl}
+              onChange={(e) => setGitUrl(e.target.value)}
+            />
+
             <div className="flex justify-end gap-4">
               <button onClick={() => setOpen(false)}>Cancel</button>
               <Button onClick={createProject} disabled={loading}>
@@ -148,4 +190,3 @@ export default function DashboardPage() {
     </div>
   );
 }
-

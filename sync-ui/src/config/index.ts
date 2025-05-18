@@ -8,22 +8,22 @@ const BASE = getBaseUrl();
 
 export const API_ROUTES = {
   // Auth
-  SIGNUP: `${BASE}/api/auth/signup`,
-  LOGIN: `${BASE}/api/auth/login`,
+  SIGNUP: `${BASE}/auth/signup`,
+  LOGIN: `${BASE}/auth/login`,
   GOOGLE_AUTH:`${BASE}/api/auth/google`,
 
   // Projects
-  PROJECT_CREATE: `${BASE}/api/project/create`,
-  PROJECT_LIST: `${BASE}/api/project/list`,
-  PROJECT_DETAILS: (projectId: string) => `${BASE}/api/project/${projectId}`,
-  PROJECT_DELETE: (id: string) => `${getBaseUrl()}/api/project/${id}`,
-  PROJECT_STREAM:   (id: string) => `${getBaseUrl()}/api/projects/${id}/stream`,
+  PROJECT_CREATE: `${BASE}/project/create`,
+  PROJECT_LIST: `${BASE}/project/list`,
+  PROJECT_DETAILS: (projectId: string) => `${BASE}/project/${projectId}`,
+  PROJECT_DELETE: (id: string) => `${getBaseUrl()}/project/${id}`,
+  PROJECT_STREAM:   (id: string) => `${getBaseUrl()}/projects/${id}/stream`,
 
 
 
   // Analysis
   ANALYZE: `${BASE}/api/analysis/analyze`,
-  RERUN: (projectId: string) => `${BASE}/api/analysis/rerun?projectId=${projectId}`,
+  RERUN: (projectId: string) => `${BASE}/project/rerun?projectId=${projectId}`,
 
 
 

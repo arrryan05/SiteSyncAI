@@ -11,10 +11,17 @@
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
+    "@git-diff-view/core": "^0.0.26",
+    "@git-diff-view/file": "^0.0.26",
+    "@git-diff-view/react": "^0.0.26",
+    "@headlessui/react": "^2.2.2",
+    "@monaco-editor/react": "^4.7.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/material": "^7.0.2",
+    "diff": "^8.0.1",
     "next": "15.2.4",
     "react": "^19.0.0",
+    "react-diff-view": "^3.3.1",
     "react-dom": "^19.0.0",
     "react-icons": "^5.5.0",
     "socket.io-client": "^4.8.1"

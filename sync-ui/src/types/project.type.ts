@@ -23,6 +23,12 @@ export interface AnalysisInsight {
   route: string;
   /** Array of performance metrics for that route */
   performanceData: PerformanceMetrics[];
+  codeChanges: {
+    FCP: CodeChange[];
+    LCP: CodeChange[];
+    CLS: CodeChange[];
+    TBT: CodeChange[];
+  };
 }
 
 /**
@@ -48,11 +54,20 @@ export interface GetProjectDetailsRequest {
 /**
  * The shape of a project returned by API.
  */
+
+export interface CodeChange {
+  file: string;
+  startLine: number;
+  endLine: number;
+  oldCode: string;
+  newCode: string;
+  explanation: string;
+}
 export interface ProjectResponse {
   id: string;
   name: string;
   website: string;
-  /** The analysis JSON array stored for this project */
+  gitUrl?: string,
   analysisSummary: AnalysisInsight[];
   status: string;
   createdAt: Date;
