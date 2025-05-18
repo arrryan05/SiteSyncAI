@@ -9,9 +9,10 @@ declare global {
   const google: {
     accounts: {
       id: {
+        CredentialResponse: { credential: string };
         initialize: (config: {
           client_id: string;
-          callback: (response: any) => void;
+          callback: (response: { credential: string }) => void;
         }) => void;
         renderButton: (
           parent: HTMLElement,

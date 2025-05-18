@@ -30,8 +30,8 @@ export function MetricInfo({
 }: {
   metric: keyof typeof METRIC_DEFINITIONS;
 }) {
-  let [isOpen, setIsOpen] = useState(false);
-  let def = METRIC_DEFINITIONS[metric];
+  const [isOpen, setIsOpen] = useState(false);
+  const def = METRIC_DEFINITIONS[metric];
 
   return (
     <>

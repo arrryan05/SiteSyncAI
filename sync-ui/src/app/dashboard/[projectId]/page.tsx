@@ -150,14 +150,14 @@
 // app/(your-route)/project/[projectId]/page.tsx
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 
 import { useAuth } from "@/hooks/usAuth";
 import { API_ROUTES } from "@/config";
 import { AnalysisInsight } from "@/types/project.type";
 import { MetricInfo } from "@/components/MetricInfo";
-import { CodeChangesPanel, Change } from "@/components/CodeChangesPanel";
+import { CodeChangesPanel } from "@/components/CodeChangesPanel";
 
 export default function ProjectAnalysisPage() {
   const router = useRouter();
@@ -169,7 +169,8 @@ export default function ProjectAnalysisPage() {
   const [rerunning, setRerunning] = useState(false);
   const [rerunStatus, setRerunStatus] = useState("");
   const pollingRef = useRef<NodeJS.Timeout | null>(null);
-  async function fetchAnalysis() {
+
+  const fetchAnalysis = useCallback(async () => {
     if (!token) return;
     const res = await fetch(API_ROUTES.PROJECT_DETAILS(projectId), {
       headers: { Authorization: `Bearer ${token}` },
@@ -183,7 +184,7 @@ export default function ProjectAnalysisPage() {
       Array.isArray(data.analysisSummary) ? data.analysisSummary : []
     );
     setStatus(typeof data.status === "string" ? data.status : "");
-  }
+  }, [projectId, token]);
 
   async function handleRerun() {
     if (!token) return;
@@ -292,7 +293,17 @@ export default function ProjectAnalysisPage() {
           {insight.codeChanges && (
             <CodeChangesPanel
               changes={Object.entries(insight.codeChanges).flatMap(
-                ([metric, arr]: [string, any[]]) =>
+                ([metric, arr]: [
+                  string,
+                  Array<{
+                    file: string;
+                    startLine: number;
+                    endLine: number;
+                    oldCode: string;
+                    newCode: string;
+                    explanation?: string;
+                  }>
+                ]) =>
                   arr.map((c) => ({
                     file: c.file,
                     startLine: c.startLine,

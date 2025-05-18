@@ -5,7 +5,7 @@ export default function Home() {
   const [website, setWebsite] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [loadingStep, setLoadingStep] = useState(0);
-  const [response, setResponse] = useState<any>(null);
+  const [response, setResponse] = useState<{ analysis: string } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const loadingMessages = [
@@ -27,7 +27,7 @@ export default function Home() {
     } else {
       setLoadingStep(0);
     }
-  }, [isLoading]);
+  }, [isLoading,loadingMessages.length]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

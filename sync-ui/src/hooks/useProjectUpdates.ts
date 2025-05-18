@@ -5,9 +5,16 @@ import { useEffect } from "react";
 import { io, Socket } from "socket.io-client";
 import { useAuth } from "./usAuth";
 
+interface RouteAnalysisUpdate {
+  routeId: string;
+  status: string;
+  // Add other relevant properties based on your actual update structure
+}
+
+
 export default function useProjectUpdates(
   projectId: string,
-  onUpdate: (update: any) => void
+  onUpdate: (update: RouteAnalysisUpdate) => void
 ) {
   const { token } = useAuth();
 

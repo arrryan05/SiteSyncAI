@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Input from "../../../components/Input";
 import Button from "../../../components/Button";
@@ -22,6 +22,23 @@ export default function LoginPage() {
     setError("Invalid credentials");
   };
 
+  const  handleGoogleResponse = useCallback(async (response: { credential: string }) =>  {
+    try {
+      const res = await fetch(API_ROUTES.GOOGLE_AUTH, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+      if (!res.ok) throw new Error("Google login failed");
+      const { token } = await res.json();
+      localStorage.setItem("token", token);
+      router.push("/dashboard");
+    } catch (err) {
+      console.error(err);
+      setError("Google sign‑in failed");
+    }
+  },[router]);
+
   // ─── Google Sign‑In Integration ────────────────────────────────────
   useEffect(() => {
     // only run on client, and only if google SDK is loaded
@@ -37,24 +54,9 @@ export default function LoginPage() {
     );
     // optionally show the One‑Tap prompt:
     // window.google.accounts.id.prompt();
-  }, []);
+  }, [handleGoogleResponse]);
 
-  async function handleGoogleResponse(response: any) {
-    try {
-      const res = await fetch(API_ROUTES.GOOGLE_AUTH, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ credential: response.credential }),
-      });
-      if (!res.ok) throw new Error("Google login failed");
-      const { token } = await res.json();
-      localStorage.setItem("token", token);
-      router.push("/dashboard");
-    } catch (err) {
-      console.error(err);
-      setError("Google sign‑in failed");
-    }
-  }
+  
   // ─────────────────────────────────────────────────────────────────────
 
   return (

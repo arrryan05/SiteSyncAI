@@ -10,7 +10,7 @@ import { API_ROUTES } from "@/config";
 
 export default function DashboardPage() {
   const router = useRouter();
-  const { token, logout } = useAuth();
+  const { token } = useAuth();
   const [projects, setProjects] = useState<ProjectResponse[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +26,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return router.push("/auth/login");
     fetchProjects();
-  }, [token]);
+  }, [token, router]);
 
   const fetchProjects = async () => {
     try {
@@ -64,7 +64,11 @@ export default function DashboardPage() {
     setLoading(true);
 
     // build payload, only include gitUrl if non-empty
-    const payload: Record<string, any> = {
+    const payload: {
+      name: string;
+      website: string;
+      gitUrl?: string;
+    } = {
       name: projectName.trim(),
       website: website.trim(),
     };

@@ -12,6 +12,15 @@ interface Props {
   initialStatus: "pending" | "complete";
 }
 
+interface MetricDetail {
+  value: string | number;
+  recommendedSteps: string[];
+}
+
+interface PerformanceMetrics {
+  [key: string]: MetricDetail;
+}
+
 export default function ProjectAnalysisStream({
   projectId,
   token,
@@ -88,14 +97,14 @@ export default function ProjectAnalysisStream({
                   <p className="text-sm text-gray-300">
                     Value:{" "}
                     <span className="font-semibold text-white">
-                      {(detail as any).value}
+                      {(detail as MetricDetail).value}
                     </span>
                   </p>
                   <p className="mt-2 text-sm text-gray-400">
                     Recommended Steps:
                   </p>
                   <ul className="list-disc list-inside text-sm text-gray-500">
-                    {(detail as any).recommendedSteps.map(
+                    {(detail as MetricDetail).recommendedSteps.map(
                       (step: string, j: number) => <li key={j}>{step}</li>
                     )}
                   </ul>

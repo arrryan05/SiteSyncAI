@@ -1,8 +1,10 @@
 "use client";
 
-import React, { useRef } from "react";
+import React from "react";
 import { DiffEditor } from "@monaco-editor/react";
 import { MetricInfo } from "./MetricInfo";
+import type { editor } from "monaco-editor"; 
+
 
 export type Change = {
   file: string;
@@ -15,7 +17,7 @@ export type Change = {
 };
 
 export function CodeChangesPanel({ changes }: { changes: Change[] }) {
-  const defineTheme = (monaco: any) => {
+  const defineTheme = (monaco: typeof import('monaco-editor')) => {
     monaco.editor.defineTheme("my-dark", {
       base: "vs-dark",
       inherit: true,
@@ -29,7 +31,7 @@ export function CodeChangesPanel({ changes }: { changes: Change[] }) {
     });
   };
 
-  const handleEditorWillMount = (monaco: any) => {
+  const handleEditorWillMount = (monaco: typeof import('monaco-editor')) => {
     defineTheme(monaco);
   };
 
