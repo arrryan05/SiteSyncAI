@@ -1,14 +1,14 @@
 // src/components/GoogleLoginButton.tsx
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { API_ROUTES } from "@/config";
 
 export default function GoogleLoginButton() {
   const router = useRouter();
 
-  const handleCredentialResponse = async (response: typeof google.accounts.id.CredentialResponse) => {
+  const handleCredentialResponse = useCallback(async (response: typeof google.accounts.id.CredentialResponse) => {
     const res = await fetch(API_ROUTES.GOOGLE_AUTH, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -21,7 +21,8 @@ export default function GoogleLoginButton() {
     } else {
       console.error(data.error);
     }
-  };
+  }, [router]);
+
   useEffect(() => {
     /* global google */
     google.accounts.id.initialize({

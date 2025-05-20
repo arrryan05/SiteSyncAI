@@ -3,7 +3,6 @@
 import React from "react";
 import { DiffEditor } from "@monaco-editor/react";
 import { MetricInfo } from "./MetricInfo";
-import type { editor } from "monaco-editor"; 
 
 
 export type Change = {

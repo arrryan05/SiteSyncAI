@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "../../hooks/usAuth";
 import { ProjectResponse } from "../../types/project.type";
@@ -23,12 +23,7 @@ export default function DashboardPage() {
   // Toast state
   const [toast, setToast] = useState<string>("");
 
-  useEffect(() => {
-    if (!token) return router.push("/auth/login");
-    fetchProjects();
-  }, [token, router]);
-
-  const fetchProjects = async () => {
+  const fetchProjects = useCallback(async () => {
     try {
       const res = await fetch(API_ROUTES.PROJECT_LIST, {
         headers: { Authorization: `Bearer ${token}` },
@@ -56,8 +51,12 @@ export default function DashboardPage() {
       console.error("Error in fetchProjects:", err);
       setProjects([]);    // clear stale
     }
-  };
-  
+  }, [token]);
+
+  useEffect(() => {
+    if (!token) return router.push("/auth/login");
+    fetchProjects();
+  }, [token, router, fetchProjects]);
 
   const createProject = async () => {
     if (!projectName.trim() || !website.trim()) return;

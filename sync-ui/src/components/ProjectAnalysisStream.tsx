@@ -17,9 +17,9 @@ interface MetricDetail {
   recommendedSteps: string[];
 }
 
-interface PerformanceMetrics {
-  [key: string]: MetricDetail;
-}
+// interface PerformanceMetrics {
+//   [key: string]: MetricDetail;
+// }
 
 export default function ProjectAnalysisStream({
   projectId,

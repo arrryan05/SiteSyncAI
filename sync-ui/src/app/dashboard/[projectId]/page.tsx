@@ -204,7 +204,7 @@ export default function ProjectAnalysisPage() {
 
   useEffect(() => {
     fetchAnalysis();
-  }, [projectId, token]);
+  }, [projectId, token, fetchAnalysis]);
 
   useEffect(() => {
     if (status === "pending") {
@@ -213,7 +213,7 @@ export default function ProjectAnalysisPage() {
       clearInterval(pollingRef.current!);
     }
     return () => clearInterval(pollingRef.current!);
-  }, [status]);
+  }, [status, fetchAnalysis]);
 
   return (
     <div className="p-6 mt-10 space-y-6">
