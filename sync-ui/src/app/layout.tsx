@@ -1,10 +1,17 @@
 // app/layout.tsx
-"use client";
 import "./globals.css";
 import Head from "next/head";
 import Script from "next/script";
 import { AuthProvider } from "../hooks/usAuth";
 import Navbar from "../components/NavBar";
+import { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: 'SiteSync AI',
+  icons: {
+    icon: '/favicon2.png', 
+  },  
+}
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
